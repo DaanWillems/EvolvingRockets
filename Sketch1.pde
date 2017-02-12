@@ -14,7 +14,7 @@ void setup() {
   
   useObst = true;
 
-  popSize = 300;
+  popSize = 100;
 
   lifespan = 300;
 
@@ -29,7 +29,10 @@ void setup() {
   th = 20;
   obstacles.add(new Obstacle(new PVector(width/2-150, height/2+180), new PVector(width/2+150, height/2+200)));
   
-  obstacles.add(new Obstacle(new PVector(width/2-150, 200), new PVector(width/2+150, 220)));
+  obstacles.add(new Obstacle(new PVector(width/2-150, 150), new PVector(width/2+150, 170)));
+    
+  obstacles.add(new Obstacle(new PVector(width/2-150, 150), new PVector(width/2-130, 500)));
+    obstacles.add(new Obstacle(new PVector(width/2+130, 150), new PVector(width/2+150, 500)));
   //obstacles.add(new Obstacle(new PVector(0, 220), new PVector(550, 240)));
  // obstacles.add(new Obstacle(new PVector(width-550, 340), new PVector(width, 360)));
 }
@@ -70,7 +73,7 @@ class Obstacle {
   
   void CheckCollision(Rocket r) {
     PVector rpos = r.pos;
-      if(rpos.x > begin.x && rpos.x < begin.x + (end.x-begin.x) && rpos.y > begin.y && rpos.y < begin.y + (end.y-begin.y)) {
+      if(rpos.x > begin.x && rpos.x < end.x && rpos.y > begin.y && rpos.y < end.y) {
          r.crashed = true;
       }
   }
