@@ -1,21 +1,22 @@
-
-Rocket r;
 int lifespan;
 int step;
 int popSize;
 boolean useObst;
 Population pop;
+ArrayList<Obstacle> obstacles; 
 
-int tx, ty, tw, th, ox, oy, ow, oh, ox1, oy1, ow1, oh1;
+int tx, ty, tw, th;
 
 void setup() {
   size(1000,600);
-
+  
+  obstacles = new ArrayList<Obstacle>();
+  
   useObst = true;
 
-  popSize = 50;
+  popSize = 300;
 
-  lifespan = 500;
+  lifespan = 300;
 
   pop = new Population();
   
@@ -26,21 +27,80 @@ void setup() {
   ty = 50;
   tw = 20;
   th = 20;
+  obstacles.add(new Obstacle(new PVector(width/2-150, height/2+180), new PVector(width/2+150, height/2+200)));
   
-  //Init obstacle
-  ox = 0;
-  oy = 200;
-  ow = 550;
-  oh = 20;
+  obstacles.add(new Obstacle(new PVector(width/2-150, 200), new PVector(width/2+150, 220)));
+  //obstacles.add(new Obstacle(new PVector(0, 220), new PVector(550, 240)));
+ // obstacles.add(new Obstacle(new PVector(width-550, 340), new PVector(width, 360)));
+}
+
+class Obstacle {
+  PVector begin;
+  PVector end;
   
-  ox1 = width-550;
-  oy1 = 400;
-  ow1 = 550;
-  oh1 = 20;
+  Obstacle(PVector _b, PVector _e) {
+    
+    float maxX = 0;
+    float maxY = 0;
+    float minX = 0;
+    float minY = 0;
+    
+    if(_b.x < _e.x) {
+      minX = _b.x;
+    } 
+    else if(_b.x > _e.x) {
+      maxX = _e.x;
+    }
+    
+    if(_b.y < _e.y) {
+      minY = _b.y;
+    } 
+    else if(_b.y > _e.y) {
+      maxY = _e.y;
+    }
+   
+    
+    begin = _b;
+    end = _e;
+  }
+  
+  void Draw() {
+    rect(begin.x, begin.y, end.x-begin.x, end.y-begin.y); 
+  }
+  
+  void CheckCollision(Rocket r) {
+    PVector rpos = r.pos;
+      if(rpos.x > begin.x && rpos.x < begin.x + (end.x-begin.x) && rpos.y > begin.y && rpos.y < begin.y + (end.y-begin.y)) {
+         r.crashed = true;
+      }
+  }
+}
+
+boolean selecting;
+
+PVector mBegin;
+PVector mEnd;
+
+void mouseClicked() {
+  if(selecting) {
+   selecting = false; 
+   obstacles.add(new Obstacle(mBegin, mEnd));
+   print(mBegin.x+"-"+mBegin.y+"-"+mEnd.x+"-"+mEnd.y);
+  } else {
+    selecting = true;
+    mBegin = new PVector(mouseX, mouseY);
+  }
 }
 
 void draw() {
     background(0);
+    
+    mEnd = new PVector(mouseX, mouseY);
+    if(mBegin != null) {
+      if(selecting) {
+        rect(mBegin.x, mBegin.y, mEnd.x-mBegin.x, mEnd.y-mBegin.y); 
+      }
+    }
 
   if(step >= lifespan) {
     delay(100);
@@ -55,10 +115,11 @@ void draw() {
   
   //Draw target
   ellipse(tx, ty, tw, th);
-  //Draw obstacle
+  //Draw obstacles
   if(useObst) {
-    rect(ox, oy, ow, oh);
-    rect(ox1, oy1, ow1, oh1);
+    for(Obstacle o : obstacles) {
+      o.Draw();
+    }
   }
 }
 
@@ -179,12 +240,9 @@ class Rocket {
       crashed = true;
     } 
     if(useObst) {
-      if (this.pos.x > ox && this.pos.x < ox + ow && this.pos.y > oy && this.pos.y < oy + oh) {
-        this.crashed = true;
-      }
-      if (this.pos.x > ox1 && this.pos.x < ox1 + ow1 && this.pos.y > oy1 && this.pos.y < oy1 + oh1) {
-        this.crashed = true;
-      }
+      for(Obstacle o : obstacles) {
+      o.CheckCollision(this);
+     }
     }
  }
  
@@ -220,8 +278,7 @@ class Rocket {
   if(crashed) {
    fitness /= 10;
   }
-  
-  print("Fitness {0} \n", fitness);
+ 
  }
  
  Rocket CrossOver(Rocket partner) {
