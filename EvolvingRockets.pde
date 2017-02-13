@@ -15,15 +15,18 @@ int tx, ty, tw, th;
 
 //General
 int step;
+boolean draggingTarget;
+double avfit;
 
 void setup() {
   size(1000,600);
   
+  avfit = 0;
   obstacles = new ArrayList<Obstacle>();
   
   useObst = true;
 
-  popSize = 100;
+  popSize = 2000;
 
   lifespan = 300;
 
@@ -33,26 +36,46 @@ void setup() {
   
   //init target
   tx = width/2;
-  ty = 50;
+  ty = 220;
   tw = 20;
   th = 20;
   
   //Define standard obstacles
   obstacles.add(new Obstacle(new PVector(width/2-150, height/2+180), new PVector(width/2+150, height/2+200)));
-  obstacles.add(new Obstacle(new PVector(width/2-150, 150), new PVector(width/2+150, 170)));
-  obstacles.add(new Obstacle(new PVector(width/2-150, 150), new PVector(width/2-130, 500)));
-  obstacles.add(new Obstacle(new PVector(width/2+130, 150), new PVector(width/2+150, 500)));
+  //obstacles.add(new Obstacle(new PVector(width/2-150, 150), new PVector(width/2+150, 170)));
+  obstacles.add(new Obstacle(new PVector(width/2-150, 170), new PVector(width/2-130, 500)));
+  obstacles.add(new Obstacle(new PVector(width/2+130, 170), new PVector(width/2+150, 500))); 
 }
 
 
 //Function for creating obstacles
 void mouseClicked() {
-  if(selecting) {
-   selecting = false; 
-   obstacles.add(new Obstacle(mBegin, mEnd));
+  if(dist(mouseX, mouseY, tx, ty) < 10) {
+    if(draggingTarget) {
+      draggingTarget = false;
+    } else {
+      draggingTarget = true; 
+    }
   } else {
-    selecting = true;
-    mBegin = new PVector(mouseX, mouseY);
+   if(selecting) {
+     selecting = false; 
+     obstacles.add(new Obstacle(mBegin, mEnd));
+    } else {
+      selecting = true;
+      mBegin = new PVector(mouseX, mouseY);
+    }
+  }
+}
+
+void keyPressed() {
+  if(keyCode == 68) {
+    ArrayList<Obstacle> newObst = new ArrayList<Obstacle>();
+    for(Obstacle o : obstacles) {
+      if(!o.CheckCollision(mouseX, mouseY)) {
+       newObst.add(o);
+      }
+    }
+    obstacles = newObst;
   }
 }
 
@@ -61,8 +84,36 @@ class Obstacle {
   PVector end;
   
   Obstacle(PVector _b, PVector _e) {
-    begin = _b;
-    end = _e;
+    
+    float minx;
+    float miny;
+    float maxx;
+    float maxy;
+    
+    if(_b.x < _e.x) {
+     minx = _b.x; 
+     maxx = _e.x;
+    } else {
+     minx = _e.x; 
+     maxx = _b.x;
+    }
+    
+    if(_b.y < _e.y) {
+     miny = _b.y; 
+     maxy = _e.y;
+    } else {
+     miny = _e.y;
+     maxy = _b.y;
+    }
+    
+    print("Min x: "+minx + "\n");
+    print("Min y: "+miny + "\n");
+    print("MAx x: "+maxx + "\n");
+    print("Max y: "+maxy + "\n");
+    print("-------------------- \n");
+    
+    begin = new PVector(minx, miny);
+    end = new PVector(maxx, maxy);
   }
   
   //Speaks for itself
@@ -77,10 +128,23 @@ class Obstacle {
          r.crashed = true;
       }
    }
+   
+  boolean CheckCollision(float xpos, float ypos) {
+    PVector rpos = new PVector(xpos, ypos);
+      if(rpos.x > begin.x && rpos.x < end.x && rpos.y > begin.y && rpos.y < end.y) {
+         return true;
+      }
+      return false;
+   }
 }
 
 void draw() {
   background(0);
+    
+  //Draw text
+  textSize(17);
+  text("Count: "+step+"/"+lifespan ,10, 17);
+  text("Avg fitness: "+avfit ,10, 34);
     
   //Draw current mouseSelection
   mEnd = new PVector(mouseX, mouseY);
@@ -99,7 +163,10 @@ void draw() {
     step++;
   }
   
-  
+  if(draggingTarget) {
+   tx = mouseX;
+   ty = mouseY;
+  }
   //Draw target
   ellipse(tx, ty, tw, th);
   //Draw obstacles
@@ -130,14 +197,19 @@ class Population {
     
     void CalcFitness() {
       double maxfit = 0;
+      double totfit = 0;
       for(int i = 0; i < rockets.length; i++) {
         Rocket r = rockets[i];
         r.CalcFitness();
         r.count = 0;
+        totfit += r.fitness;
         if(r.fitness > maxfit) {
           maxfit = r.fitness;
         }
       }
+      avfit = totfit / popSize;
+     
+   
      
       for(int i = 0; i < rockets.length; i++) {
        rockets[i].fitness /= maxfit; 
