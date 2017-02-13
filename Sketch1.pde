@@ -1,11 +1,20 @@
+//Create obstacle variables
+boolean selecting;
+PVector mBegin;
+PVector mEnd;
+
+//Simulation Variables
+ArrayList<Obstacle> obstacles; 
 int lifespan;
-int step;
 int popSize;
 boolean useObst;
 Population pop;
-ArrayList<Obstacle> obstacles; 
 
+//Target Variables
 int tx, ty, tw, th;
+
+//General
+int step;
 
 void setup() {
   size(1000,600);
@@ -27,14 +36,24 @@ void setup() {
   ty = 50;
   tw = 20;
   th = 20;
-  obstacles.add(new Obstacle(new PVector(width/2-150, height/2+180), new PVector(width/2+150, height/2+200)));
   
+  //Define standard obstacles
+  obstacles.add(new Obstacle(new PVector(width/2-150, height/2+180), new PVector(width/2+150, height/2+200)));
   obstacles.add(new Obstacle(new PVector(width/2-150, 150), new PVector(width/2+150, 170)));
-    
   obstacles.add(new Obstacle(new PVector(width/2-150, 150), new PVector(width/2-130, 500)));
-    obstacles.add(new Obstacle(new PVector(width/2+130, 150), new PVector(width/2+150, 500)));
-  //obstacles.add(new Obstacle(new PVector(0, 220), new PVector(550, 240)));
- // obstacles.add(new Obstacle(new PVector(width-550, 340), new PVector(width, 360)));
+  obstacles.add(new Obstacle(new PVector(width/2+130, 150), new PVector(width/2+150, 500)));
+}
+
+
+//Function for creating obstacles
+void mouseClicked() {
+  if(selecting) {
+   selecting = false; 
+   obstacles.add(new Obstacle(mBegin, mEnd));
+  } else {
+    selecting = true;
+    mBegin = new PVector(mouseX, mouseY);
+  }
 }
 
 class Obstacle {
@@ -42,75 +61,40 @@ class Obstacle {
   PVector end;
   
   Obstacle(PVector _b, PVector _e) {
-    
-    float maxX = 0;
-    float maxY = 0;
-    float minX = 0;
-    float minY = 0;
-    
-    if(_b.x < _e.x) {
-      minX = _b.x;
-    } 
-    else if(_b.x > _e.x) {
-      maxX = _e.x;
-    }
-    
-    if(_b.y < _e.y) {
-      minY = _b.y;
-    } 
-    else if(_b.y > _e.y) {
-      maxY = _e.y;
-    }
-   
-    
     begin = _b;
     end = _e;
   }
   
+  //Speaks for itself
   void Draw() {
     rect(begin.x, begin.y, end.x-begin.x, end.y-begin.y); 
   }
   
+  //Checks if rocket has collided
   void CheckCollision(Rocket r) {
     PVector rpos = r.pos;
       if(rpos.x > begin.x && rpos.x < end.x && rpos.y > begin.y && rpos.y < end.y) {
          r.crashed = true;
       }
-  }
-}
-
-boolean selecting;
-
-PVector mBegin;
-PVector mEnd;
-
-void mouseClicked() {
-  if(selecting) {
-   selecting = false; 
-   obstacles.add(new Obstacle(mBegin, mEnd));
-   print(mBegin.x+"-"+mBegin.y+"-"+mEnd.x+"-"+mEnd.y);
-  } else {
-    selecting = true;
-    mBegin = new PVector(mouseX, mouseY);
-  }
+   }
 }
 
 void draw() {
-    background(0);
+  background(0);
     
-    mEnd = new PVector(mouseX, mouseY);
-    if(mBegin != null) {
-      if(selecting) {
-        rect(mBegin.x, mBegin.y, mEnd.x-mBegin.x, mEnd.y-mBegin.y); 
-      }
+  //Draw current mouseSelection
+  mEnd = new PVector(mouseX, mouseY);
+  if(mBegin != null) {
+    if(selecting) {
+      rect(mBegin.x, mBegin.y, mEnd.x-mBegin.x, mEnd.y-mBegin.y); 
     }
+  }
 
   if(step >= lifespan) {
     delay(100);
     pop.Evolve();
     step = 0;
-  }
-  else {
+  } else {
     pop.Update();
     step++;
   }
