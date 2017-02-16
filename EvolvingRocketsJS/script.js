@@ -1,70 +1,119 @@
 var maxspeed = 2;
 var lifeSpan = 200;
 var count = 0;
-var popSize = 20;
+var popSize = 1;
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
-var rockets = []
 var width = c.width;
 var height = c.height;
-
-var rocket = new Rocket();
-
-rocket.Draw();
-
+var size = 10;
 var pop = new Population();
-pop.Init();
 
+setInterval(function() {pop.Update();}, 13);
 
-
-
-function Gene() {
-	this.xAcc = Math.random();
-	this.xAcc -= 0.5;
+function Vector() {
 	
-	this.yAcc = Math.random();
-	this.yAcc -= 0.5;
+	this.x = 0;
+	this.y = 0.0;
+	
+	this.heading = function() {
+		
+	}
+	
+	this.setMag = function(newMag) {
+	
+	}
+	
+	this.getMag = function() {
+		return Math.sqrt(this.x*this.x + this.y*this.y);
+	}
+	
+	this.norm = function() {
+		var m = this.getMag();
+		if(m > 0) {
+			this.div(m);
+		}
+	}
+	
+	this.div = function(n) {
+		this.x /= n;
+		this.y /= n;
+	}
+	
+	this.add = function(vector) {
+		this.x += vector.x;
+		this.y += vector.y;
+	}
+	
+	this.sub = function(vector) {
+		this.x -= vector.x;
+		this.y -= vector.y;
+	}
+	
 }
 
 function Population() {
-
 	
-
+	this.rockets = [];
 	
-	this.MakeRocket = function() {
+	for(i = 0; i < popSize; i++) {
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
 		
-		if(rockets.length < popSize) {
-			rockets.push(new Rocket());
-			window.setTimeout(this.MakeRocket, 5);
-		}
 	}
 	
+	this.Evolve = function() {
+
+	}
 	
 	this.Update = function() {
+		//Check if we should reset
 		if(count > lifeSpan-2) {
-			this.Init();
+			this.Evolve();
 			count = 0;
 		}
-		ctx.clearRect(0, 0, width, height);
-		for(i = 0; i < rockets.length; i++) {
-			rockets[i].Update();
+		
+		//Draw all rockets
+		ctx.fillStyle="black";
+		ctx.fillRect(0, 0, width, height);
+		for(i = 0; i < this.rockets.length; i++) {
+			this.rockets[i].Update();
 		}
 		count++;
-	}
-	
-	this.Init = function() {
 		
-		var i = 0;
-		
-		this.MakeRocket();
-		setInterval(function(){ this.Update(); }, 20);
+		//Draw all obstacles
 	}
 }
 
 function Dna() {
 	this.genes = [];
 	for(i = 0; i < lifeSpan; i++) {
-		this.genes.push(new Gene());
+		var v = new Vector();
+		v.x = Math.random()-0.5;
+		v.y = Math.random()-0.5;
+		this.genes.push(v);
 	}
 }
 
@@ -74,50 +123,43 @@ function Rocket() {
 	
 	this.Crashed = false;
 	
-	this.xPos = width/2;
-	this.yPos = height/2;
+	this.pos = new Vector();
+	this.vel = new Vector();
 	
-	this.xVel = 0;
-	this.yVel = 0;
+	this.pos.x = width/2;
+	this.pos.y = height-50;
 	
 	this.Update = function() {
-		this.ApplyForce();
+		
+		if(!this.Crashed) {
+			this.ApplyForce();
+			this.IsCrashed();
+		}
+		
 		this.Draw();
+		
 	}
 	
 	this.ApplyForce = function() {
-		this.xVel += this.dna.genes[count].xAcc;
-		this.yVel += this.dna.genes[count].yAcc;
-		if(!this.Crashed) {
-			this.xPos += this.xVel;
-			this.yPos += this.yVel;
-		} else {
-			xVel = 0.0;
-			yVel = 0.0;
-		}
-		
-		if(this.xVel > maxspeed) {
-			this.xVel = maxspeed;
-		}
-		if(this.yVel > maxspeed) {
-			this.yVel = maxspeed;
-		}
-		console.log(this.dna.genes[count].xAcc);
-		console.log(this.dna.genes[count].yAcc);
-		this.IsCrashed();
+		this.vel.add(this.dna.genes[count]);
+		this.vel.norm();
+		this.pos.add(this.vel);
 	};
 	
 	this.IsCrashed = function() {
-		if (this.xPos > width || this.xPos < 0) {
-		  this.Crashed = true;
-		}
-		if (this.yPos > height || this.yPos < 0) {
-		  this.Crashed = true;
-		} 
+		if(this.pos.x + size > width || this.pos.x < 0) {
+			this.Crashed = true;
+		}	
+
+		if(this.pos.y + size > height || this.pos.y < 0) {
+			this.Crashed = true;
+		}			
 	}
 	
 	this.Draw = function() {
-		ctx.fillRect(this.xPos, this.yPos, 10 ,10)
+		console.log(this.pos.x, this.pos.y, this.pos.getMag());
+		ctx.fillStyle="white";
+		ctx.fillRect(this.pos.x, this.pos.y, size ,size)
 	};
 }
 
