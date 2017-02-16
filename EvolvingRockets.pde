@@ -41,9 +41,9 @@ void setup() {
   th = 20;
   
   //Define standard obstacles
-  obstacles.add(new Obstacle(new PVector(width/2-150, height/2+180), new PVector(width/2+150, height/2+200)));
+  //obstacles.add(new Obstacle(new PVector(width/2-150, height/2+180), new PVector(width/2+150, height/2+200)));
   //obstacles.add(new Obstacle(new PVector(width/2-150, 150), new PVector(width/2+150, 170)));
-  obstacles.add(new Obstacle(new PVector(width/2-150, 170), new PVector(width/2-130, 500)));
+ // obstacles.add(new Obstacle(new PVector(width/2-150, 170), new PVector(width/2-130, 500)));
   obstacles.add(new Obstacle(new PVector(width/2+130, 170), new PVector(width/2+150, 500))); 
 }
 
@@ -106,12 +106,6 @@ class Obstacle {
      maxy = _b.y;
     }
     
-    print("Min x: "+minx + "\n");
-    print("Min y: "+miny + "\n");
-    print("MAx x: "+maxx + "\n");
-    print("Max y: "+maxy + "\n");
-    print("-------------------- \n");
-    
     begin = new PVector(minx, miny);
     end = new PVector(maxx, maxy);
   }
@@ -136,10 +130,47 @@ class Obstacle {
       }
       return false;
    }
+   
+     boolean CheckCollision(float x2, float y2, int width2, int height2) {
+     float x1 = begin.x;
+     float y1 = begin.y;
+     
+     float width1 = end.x-begin.x;
+     float height1 = end.y-begin.y;
+     
+     print(width1 + " || " + height1 + "\n"); 
+     
+     if(x1 < x2 + width2 &&
+       x1 + width1 > x2 &&
+       y1 < y2+height2 &&
+       height1+y1 > y2) {
+        return true; 
+       }
+      return false;
+   }
 }
 
 void draw() {
   background(0);
+  
+  int squareSize = 20;
+  
+  for(int x = 0; x < height; x += squareSize) {
+    for(int i = 0; i < width; i += squareSize) {
+      boolean col = false;
+      for(Obstacle o :obstacles) {
+        if(o.CheckCollision(i, x, squareSize, squareSize)) {
+          col = true;
+        }
+      }
+      if(col) {
+        fill(color(255, 0, 0, 255));
+      } else {
+       fill(color(0, 0, 255, 50)); 
+      }
+      rect(i, x, squareSize, squareSize);
+    }
+  }
     
   //Draw text
   textSize(17);
