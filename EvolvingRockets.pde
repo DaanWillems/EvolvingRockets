@@ -26,7 +26,7 @@ void setup() {
   
   useObst = true;
 
-  popSize = 2000;
+  popSize = 1000;
 
   lifespan = 300;
 
@@ -283,7 +283,7 @@ class DNA {
    genes[0].setMag(1);
   for (int i = 1; i < genes.length; i++) {
     PVector v = PVector.random2D();
-    v.setMag(0.6);
+    v.setMag(2);
     genes[i] = v;
   }
  }
