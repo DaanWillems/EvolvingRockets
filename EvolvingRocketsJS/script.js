@@ -11,7 +11,9 @@ var pop = new Population();
 
 var Obstacles = [];
 
-setInterval(function() {pop.Update();}, 13);
+var grid = new Grid();
+
+setInterval(function() {pop.Update();}, 1000/30);
 
 var v1 = new Vector(10, 10);
 
@@ -21,6 +23,17 @@ Obstacles.push(new Obstacle(v1, v2));
 
 var target = new Target(new Vector(width/2, 0+50), 10);
 
+
+function Grid() {
+	this.Draw = function() {
+		for(y = 0; y < height; y += 20) {
+			for(x = 0; x < width; x += 20) {
+				ctx.fillStyle = "blue";;
+				ctx.fillText("0",x,y);
+			}
+		}
+	}
+}
 
 function Vector(_x, _y) {
 	
@@ -148,6 +161,7 @@ function Population() {
 		}
 		//Draw target
 		target.Draw();
+		grid.Draw();
 	}
 }
 
@@ -189,7 +203,7 @@ function Rocket() {
 	this.ApplyForce = function() {
 		this.vel.add(this.dna.genes[count]);
 		this.vel.norm();
-		this.vel.setMag(1.6);
+		this.vel.setMag(6.0);
 		this.pos.add(this.vel);
 	};
 	

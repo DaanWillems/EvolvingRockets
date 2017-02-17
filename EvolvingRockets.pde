@@ -19,7 +19,7 @@ boolean draggingTarget;
 double avfit;
 
 void setup() {
-  size(1000,600);
+  size(2000,1000);
   
   avfit = 0;
   obstacles = new ArrayList<Obstacle>();
@@ -28,7 +28,7 @@ void setup() {
 
   popSize = 1000;
 
-  lifespan = 300;
+  lifespan = 400;
 
   pop = new Population();
   
@@ -41,8 +41,8 @@ void setup() {
   th = 20;
   
   //Define standard obstacles
-  //obstacles.add(new Obstacle(new PVector(width/2-150, height/2+180), new PVector(width/2+150, height/2+200)));
-  //obstacles.add(new Obstacle(new PVector(width/2-150, 150), new PVector(width/2+150, 170)));
+  obstacles.add(new Obstacle(new PVector(width/2-150, height/2+180), new PVector(width/2+150, height/2+200)));
+  obstacles.add(new Obstacle(new PVector(width/2-150, 150), new PVector(width/2+150, 170)));
  // obstacles.add(new Obstacle(new PVector(width/2-150, 170), new PVector(width/2-130, 500)));
   obstacles.add(new Obstacle(new PVector(width/2+130, 170), new PVector(width/2+150, 500))); 
 }
@@ -154,7 +154,7 @@ void draw() {
   background(0);
   
   int squareSize = 20;
-  
+  /*
   for(int x = 0; x < height; x += squareSize) {
     for(int i = 0; i < width; i += squareSize) {
       boolean col = false;
@@ -171,7 +171,7 @@ void draw() {
       rect(i, x, squareSize, squareSize);
     }
   }
-    
+    */
   //Draw text
   textSize(17);
   text("Count: "+step+"/"+lifespan ,10, 17);
@@ -181,7 +181,7 @@ void draw() {
   mEnd = new PVector(mouseX, mouseY);
   if(mBegin != null) {
     if(selecting) {
-      rect(mBegin.x, mBegin.y, mEnd.x-mBegin.x, mEnd.y-mBegin.y); 
+      rect(mBegin.x, mBegin.y, mEnd.x-mBegin.x, mEnd.y-mBegin.y);  //<>//
     }
   }
 
@@ -279,11 +279,11 @@ class DNA {
  DNA() {
    genes = new PVector[lifespan];
    
-   genes[0] = new PVector(0, -10);
+   genes[0] = new PVector(0, -10); //<>//
    genes[0].setMag(1);
   for (int i = 1; i < genes.length; i++) {
     PVector v = PVector.random2D();
-    v.setMag(2);
+    v.setMag(0.6);
     genes[i] = v;
   }
  }
@@ -357,7 +357,7 @@ class Rocket {
    pos.add(vel);
    vel.limit(4);
  }
- 
+  //<>//
  void CalcFitness() {
   float d = dist(pos.x, pos.y, tx, ty);
   fitness = map(d, 0, width, width, 0);
