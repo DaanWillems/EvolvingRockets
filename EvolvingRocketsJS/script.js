@@ -1,5 +1,5 @@
 var maxspeed = 2;
-var lifeSpan = 200;
+var lifeSpan = 300;
 var count = 0;
 var popSize = 1;
 var c = document.getElementById("myCanvas");
@@ -9,19 +9,34 @@ var height = c.height;
 var size = 10;
 var pop = new Population();
 
+var Obstacles = [];
+
 setInterval(function() {pop.Update();}, 13);
 
-function Vector() {
+var v1 = new Vector(10, 10);
+
+var v2 = new Vector(60, 60);
+
+Obstacles.push(new Obstacle(v1, v2));
+
+var target = new Target(new Vector(width/2, 0+50), 10);
+
+
+function Vector(_x, _y) {
 	
-	this.x = 0;
-	this.y = 0.0;
-	
-	this.heading = function() {
-		
+	if(_x != null && _y != null) {
+		this.x = _x;
+		this.y = _y;
 	}
-	
+	else {
+		this.x = 0.0;
+		this.y = 0.0;
+	}	
+
 	this.setMag = function(newMag) {
-	
+		this.norm();
+		this.x *= newMag;
+		this.y *= newMag;
 	}
 	
 	this.getMag = function() {
@@ -56,6 +71,7 @@ function Population() {
 	
 	this.rockets = [];
 	
+	//Temporary method of creating rockets to solve the annoying Math.random situation
 	for(i = 0; i < popSize; i++) {
 		this.rockets.push(new Rocket());
 		this.rockets.push(new Rocket());
@@ -81,11 +97,34 @@ function Population() {
 		this.rockets.push(new Rocket());
 		this.rockets.push(new Rocket());
 		this.rockets.push(new Rocket());
-		
 	}
 	
 	this.Evolve = function() {
-
+		this.rockets = [];
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
+		this.rockets.push(new Rocket());
 	}
 	
 	this.Update = function() {
@@ -104,11 +143,17 @@ function Population() {
 		count++;
 		
 		//Draw all obstacles
+		for(i = 0; i < Obstacles.length; i++) {
+			Obstacles[i].Draw();
+		}
+		//Draw target
+		target.Draw();
 	}
 }
 
 function Dna() {
 	this.genes = [];
+	//Init dna with random vectors
 	for(i = 0; i < lifeSpan; i++) {
 		var v = new Vector();
 		v.x = Math.random()-0.5;
@@ -123,12 +168,12 @@ function Rocket() {
 	
 	this.Crashed = false;
 	
-	this.pos = new Vector();
+	//Place rocket in the middle at the bottom of the screen
+	this.pos = new Vector(width/2, height-50);
+	
 	this.vel = new Vector();
 	
-	this.pos.x = width/2;
-	this.pos.y = height-50;
-	
+	//Update the entire rocket
 	this.Update = function() {
 		
 		if(!this.Crashed) {
@@ -140,12 +185,15 @@ function Rocket() {
 		
 	}
 	
+	//Move the rocket
 	this.ApplyForce = function() {
 		this.vel.add(this.dna.genes[count]);
 		this.vel.norm();
+		this.vel.setMag(1.6);
 		this.pos.add(this.vel);
 	};
 	
+	//Check if rocket has collided with something
 	this.IsCrashed = function() {
 		if(this.pos.x + size > width || this.pos.x < 0) {
 			this.Crashed = true;
@@ -156,14 +204,63 @@ function Rocket() {
 		}			
 	}
 	
+	//Draw rocket on screen
 	this.Draw = function() {
-		console.log(this.pos.x, this.pos.y, this.pos.getMag());
 		ctx.fillStyle="white";
 		ctx.fillRect(this.pos.x, this.pos.y, size ,size)
 	};
 }
 
-function Obstacle() {
+function Target(v, size) {
+	this.pos = v;
 	
-	
+	this.Draw = function() {
+		ctx.fillStyle="white";
+		ctx.beginPath();
+		ctx.arc(this.pos.x, this.pos.y, size, 0, 2 * Math.PI);
+		ctx.closePath();
+		ctx.fill();
+	}
 }
+
+function Obstacle(_b, _e) {
+  
+	this.minx;
+    this.miny;
+    this.maxx;
+    this.maxy;
+    
+    if(_b.x < _e.x) {
+     minx = _b.x; 
+     maxx = _e.x;
+    } else {
+     minx = _e.x; 
+     maxx = _b.x;
+    }
+    
+    if(_b.y < _e.y) {
+     miny = _b.y; 
+     maxy = _e.y;
+    } else {
+     miny = _e.y;
+     maxy = _b.y;
+    }
+    
+	begin = new Vector(minx, miny);
+    end = new Vector(maxx, maxy);
+	
+	this.Draw = function() {
+		ctx.fillRect(begin.x, begin.y, end.x-begin.x, end.y-begin.y); 
+	}
+	
+	this.Collides = function(bx, by, ex, ey) {
+		
+	}
+}
+
+
+
+
+
+
+
